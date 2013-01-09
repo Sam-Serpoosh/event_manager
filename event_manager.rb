@@ -1,5 +1,6 @@
 require_relative "data_formatter"
 require_relative "sunlight_wrapper"
+require_relative "thank_letter_generator"
 require "csv"
 
 class EventManager
@@ -11,28 +12,32 @@ class EventManager
     end
   end
 
-  def rep_lookup
+  def output_data(filename)
+    @file.rewind
+    CSV.open(filename, "w") do |output|
+      @file.each do |line|
+        output << line.headers if @file.lineno == 2
+        output << clean_line(line)
+      end
+    end
+  end
+
+  def create_form_letters
+    letter = File.open("form_letter.html", "r") { |f| f.read }
+    @file.rewind
+    20.times do
+      line = @file.readline
+      ThankLetterGenerator.new(line, "output").generate_letter
+    end
+  end
+
+  def representative_lookup
+    @file.rewind
     20.times do
       line = @file.readline
       representatives = SunlightWrapper.get_representatives(line[:zipcode])
       formatted_names = format_representatives_names(representatives)
-      puts "#{line[:last_name]}, #{line[:first_name]}, #{line[:zipcode]}, #{formatted_names.join(", ")}"
-    end
-  end
-
-  def format_representatives_names(representatives)
-    representatives.collect do |legislator|
-      DataFormatter.format_legislator_name(legislator)
-    end 
-  end
-
-  def output_data(filename)
-    output = CSV.open(filename, "w")
-    @file.each do |line|
-      if @file.lineno == 2
-        output << line.headers
-      end
-      output << clean_line(line)
+      puts "#{line[:last_name]} => #{formatted_names.join(", ")}"
     end
   end
 
@@ -41,6 +46,16 @@ class EventManager
     line[:zipcode] = DataFormatter.clean_zipcode(line[:zipcode])
     line
   end
+
+  private
+    def format_representatives_names(representatives)
+      representatives.collect do |legislator|
+        DataFormatter.format_legislator_name(legislator)
+      end 
+    end
 end
 
-EventManager.new("event_attendees.csv").rep_lookup
+event_manager = EventManager.new("event_attendees.csv")
+event_manager.output_data("event_attendees_clean.csv")
+event_manager.representative_lookup
+event_manager.create_form_letters

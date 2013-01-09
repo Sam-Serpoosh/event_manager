@@ -1,2 +1,4 @@
 *.swp
 *.csv
+output/
+test_files/
