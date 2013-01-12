@@ -1,7 +1,7 @@
 require_relative "data_formatter"
 require_relative "sunlight_wrapper"
 require_relative "thank_letter_generator"
-require_relative "rank_time"
+require_relative "rank_time_day"
 require "csv"
 
 class EventManager
@@ -48,13 +48,23 @@ class EventManager
   end
 
   def busiest_hour_of_registration
-    rank_time = RankTime.new
+    rank_time = RankTimeDay.new
     @file.rewind
     20.times do
       line = @file.readline
       rank_time.update_hour_slot_count(line[:regdate])
     end
     rank_time.busiest_hour
+  end
+
+  def busiest_days_of_registration
+    rank_time = RankTimeDay.new
+    @file.rewind
+    20.times do
+      line = @file.readline
+      rank_time.update_weekdays_count(line[:regdate])
+    end
+    rank_time.busiest_days
   end
 
   private
@@ -70,3 +80,4 @@ event_manager.output_data("event_attendees_clean.csv")
 event_manager.representative_lookup
 event_manager.create_form_letters
 puts event_manager.busiest_hour_of_registration
+puts event_manager.busiest_days_of_registration
