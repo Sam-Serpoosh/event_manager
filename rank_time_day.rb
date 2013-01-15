@@ -41,7 +41,7 @@ class RankTimeDay
 
   def busiest_days
     busiest_day = @weekdays.each_with_index.max[1]
-    @weekdays[busiest_day] = 0
+    @weekdays[busiest_day] = 0 #set to something minimum
     second_busiest_day = @weekdays.each_with_index.max[1]
     [WeekDays.day_of_week(busiest_day), WeekDays.day_of_week(second_busiest_day)]
   end

@@ -2,6 +2,7 @@ require_relative "data_formatter"
 require_relative "sunlight_wrapper"
 require_relative "thank_letter_generator"
 require_relative "rank_time_day"
+require_relative "state_stat"
 require "csv"
 
 class EventManager
@@ -67,6 +68,15 @@ class EventManager
     rank_time.busiest_days
   end
 
+  def state_stats
+    @file.rewind
+    state_stats = StateStats.new
+    @file.each do |line|
+      state_stats.update_state_stats(line[:state])
+    end
+    state_stats.stats
+  end
+
   private
     def format_representatives_names(representatives)
       representatives.collect do |legislator|
@@ -81,3 +91,4 @@ event_manager.representative_lookup
 event_manager.create_form_letters
 puts event_manager.busiest_hour_of_registration
 puts event_manager.busiest_days_of_registration
+p event_manager.state_stats
