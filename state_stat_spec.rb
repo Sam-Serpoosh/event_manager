@@ -20,11 +20,13 @@ describe StateStats do
     subject.attendees_from(:non_existent).should == 0
   end
 
-  it "returns the list of well-formatted stats" do
+  it "returns the list of well-formatted stats and sorted by state name" do
+    subject.update_state_stats("MI")
     subject.update_state_stats("MI")
     subject.update_state_stats("MI")
     subject.update_state_stats("CA")
+    subject.update_state_stats("CA")
     subject.update_state_stats("IL")
-    subject.stats.should == ["MI: 2", "CA: 1", "IL: 1"]
+    subject.stats.should == ["CA\t2\t(2)", "IL\t1\t(3)", "MI\t3\t(1)"]
   end
 end

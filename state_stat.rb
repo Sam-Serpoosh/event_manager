@@ -18,8 +18,11 @@ class StateStats
   end
 
   def stats
-    @state_stats.map do |key, value|
-      "#{key.to_s}: #{value}"
+    ranks = @state_stats.sort_by { |state, counter| -counter }
+                        .collect { |state, counter| state }
+    @state_stats = @state_stats.sort_by { |state, counter| state }
+    @state_stats.map do |state, counter|
+      "#{state}\t#{counter}\t(#{ranks.index(state) + 1})"
     end
   end
 end
