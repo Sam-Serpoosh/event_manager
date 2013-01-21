@@ -1,14 +1,14 @@
 require_relative "event_manager"
 
 describe EventManager do
-  it "cleans the line" do 
+  it "cleans the attendee informaiton" do 
     event_manager = EventManager.new("anything")
-    line = { homephone: "1(616)666-1500", 
-             name: "sam", zipcode: "234" }
-    cleaned_line = event_manager.clean_line(line)
+    attendee_info = { homephone: "1(616)666-1500", 
+                      name: "sam", zipcode: "234" }
+    cleaned_info = event_manager.clean_attendee_info(attendee_info)
 
-    cleaned_line[:homephone].should == "6166661500"
-    cleaned_line[:zipcode].should == "00234"
-    cleaned_line[:name].should == "sam"
+    cleaned_info[:homephone].should == "6166661500"
+    cleaned_info[:zipcode].should == "00234"
+    cleaned_info[:name].should == "sam"
   end
 end

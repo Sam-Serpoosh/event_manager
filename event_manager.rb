@@ -16,10 +16,14 @@ class EventManager
   def output_data(filename)
     @file.rewind
     CSV.open(filename, "w") do |output|
-      @file.each do |line|
-        output << line.headers if @file.lineno == 2
-        output << clean_line(line)
-      end
+      output_cleaned_attendee_info(output)
+    end
+  end
+
+  def output_cleaned_attendee_info(output_file)
+    @file.each do |attendee_info|
+      output_file << attendee_info.headers if @file.lineno == 2
+      output_file << clean_attendee_info(attendee_info)
     end
   end
 
@@ -27,33 +31,33 @@ class EventManager
     letter = File.open("form_letter.html", "r") { |f| f.read }
     @file.rewind
     20.times do
-      line = @file.readline
-      ThankLetterGenerator.new(line, "output").generate_letter
+      attendee_info = @file.readline
+      ThankLetterGenerator.new(attendee_info, "output").generate_letter
     end
   end
 
   def representative_lookup
     @file.rewind
     20.times do
-      line = @file.readline
-      representatives = SunlightWrapper.get_representatives(line[:zipcode])
+      attendee_info = @file.readline
+      representatives = SunlightWrapper.get_representatives(attendee_info[:zipcode])
       formatted_names = format_representatives_names(representatives)
-      puts "#{line[:last_name]} => #{formatted_names.join(", ")}"
+      puts "#{attendee_info[:last_name]} => #{formatted_names.join(", ")}"
     end
   end
 
-  def clean_line(line) 
-    line[:homephone] = DataFormatter.clean_phonenumber(line[:homephone])
-    line[:zipcode] = DataFormatter.clean_zipcode(line[:zipcode])
-    line
+  def clean_attendee_info(attendee_info) 
+    attendee_info[:homephone] = DataFormatter.clean_phonenumber(attendee_info[:homephone])
+    attendee_info[:zipcode] = DataFormatter.clean_zipcode(attendee_info[:zipcode])
+    attendee_info
   end
 
   def busiest_hour_of_registration
     rank_time = RankTimeDay.new
     @file.rewind
     20.times do
-      line = @file.readline
-      rank_time.update_hour_slot_count(line[:regdate])
+      attendee_info = @file.readline
+      rank_time.update_hour_slot_count(attendee_info[:regdate])
     end
     rank_time.busiest_hour
   end
@@ -62,8 +66,8 @@ class EventManager
     rank_time = RankTimeDay.new
     @file.rewind
     20.times do
-      line = @file.readline
-      rank_time.update_weekdays_count(line[:regdate])
+      attendee_info = @file.readline
+      rank_time.update_weekdays_count(attendee_info[:regdate])
     end
     rank_time.busiest_days
   end
@@ -71,8 +75,8 @@ class EventManager
   def state_stats
     @file.rewind
     state_stats = StateStats.new
-    @file.each do |line|
-      state_stats.update_state_stats(line[:state])
+    @file.each do |attendee_info|
+      state_stats.update_state_stats(attendee_info[:state])
     end
     state_stats.stats
   end
